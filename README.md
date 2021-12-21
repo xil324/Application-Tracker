@@ -4,7 +4,18 @@ This application allows users to track job applications.
 
 ### Table of Contents
 1. [General Info](#-General-Info)
-2. [Demo](#-Demo)
-3. [Technologies](#-Technologies)
-4. [Installation](#-Installation)
+2. [Technologies](#-Technologies)
+3. [Installation](#-Installation)
 
+### General Info
+
+Dream Job application allows users to track job applications, which includes adding, deleting, updating applications. The summary reports also give users an overview of thier application status. 
+
+### 🧪 Technologies
+* Axios
+* Babel
+* Express
+* Firebase
+* Postgres SQL
+* Nodemon
+* React
