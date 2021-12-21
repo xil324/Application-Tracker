@@ -9,7 +9,7 @@ This application allows users to track job applications.
 
 ### General Info
 
-Dream Job application allows users to track job applications, which includes adding, deleting, updating applications. The summary reports also give users an overview of thier application status. 
+Dream Job application allows users to track job applications, which includes adding, deleting, and updating applications. The summary reports also give users an overview of thier application status. 
 
 ### Technologies
 * Axios
