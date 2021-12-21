@@ -21,8 +21,9 @@ Dream Job application allows users to track job applications, which includes add
 * React
 
 ### Installation and Setup
+```
 $ git clone https://github.com/xil324/Application-Tracker.git
 $ npm install
 $ npm run watch
 $ npm start
-
+```
