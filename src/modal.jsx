@@ -1,5 +1,6 @@
 import React from "react";
 import axios from "axios";
+import { tickStep } from "d3";
 
 class Modal extends React.Component {
   constructor(props) {
@@ -22,20 +23,18 @@ class Modal extends React.Component {
   }
 
   close() {
-    console.log("invoking close function");
-    // this.props.close();
+    console.log("invoking this");
     this.setState({ name: "" });
-    console.log(this.state.name);
-    // this.setState({ position: "" });
-    // this.setState({ date: "" });
-    // this.setState({ importance: "" });
-    // this.setState({ status: "" });
-    // this.setState({ url: "" });
     this.setState({ comment: "" });
+    this.setState({ position: "" });
+    this.setState({ url: "" });
+    this.setState({ date: "" });
+    this.setState({ importance: "" });
+    this.props.close();
   }
 
   submitInfo() {
-    // event.preventdefault();
+    event.preventdefault();
     if (this.props.info !== null) {
       this.props.delete();
       axios
@@ -49,26 +48,16 @@ class Modal extends React.Component {
           comment: this.state.comment,
         })
         .then((response) => {
-          alert("UPDATE IT");
+          alert("Thank you!");
           this.props.user();
           this.props.status();
           this.props.pie();
           this.props.graph();
         })
-        // .then(() => {
-        //   this.setState({ name: "" });
-        //   this.setState({ position: "" });
-        //   this.setState({ date: "" });
-        //   this.setState({ importance: "" });
-        //   this.setState({ status: "" });
-        //   this.setState({ url: "" });
-        //   this.setState({ comment: "" });
-        // })
         .catch((err) => {
           console.log(err);
         });
     } else {
-      console.log("inputing a application");
       axios
         .post("/info", {
           name: this.state.name,
@@ -86,15 +75,7 @@ class Modal extends React.Component {
           this.props.pie();
           this.props.graph();
         })
-        // .then(() => {
-        //   this.setState({ name: "" });
-        //   this.setState({ position: "" });
-        //   this.setState({ date: "" });
-        //   this.setState({ importance: "" });
-        //   this.setState({ status: "" });
-        //   this.setState({ url: "" });
-        //   this.setState({ comment: "" });
-        // })
+
         .catch((err) => {
           console.log(err);
         });
