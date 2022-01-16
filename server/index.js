@@ -17,9 +17,18 @@ app.listen("3000", () => {
 });
 
 app.get("/info", (req, res) => {
-  db.query(`select * from info`).then((response) => {
-    res.status(200).send(response);
-  });
+  const uid = req.query;
+  db.query(`select name from user_info where uid = uid`)
+    .then((response) => {
+      const name = response[0].name;
+      return db.query(`select * from info where user_name = '${name}'`);
+    })
+    .then((data) => {
+      res.send(data);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 });
 
 app.post("/info", (req, res) => {
@@ -55,7 +64,10 @@ app.put("/info/delete", (req, res) => {
 });
 
 app.get("/info/date", (req, res) => {
-  db.query(`select date, count(*) from info group by date order by date`)
+  const username = req.query.name;
+  db.query(
+    `select date, count(*) from info where user_name = '${username}' group by date order by date`
+  )
     .then((data) => {
       res.send(data);
     })
@@ -65,7 +77,10 @@ app.get("/info/date", (req, res) => {
 });
 
 app.get("/info/pie", (req, res) => {
-  db.query(`select position, count(*) from info group by position`)
+  const username = req.query.name;
+  db.query(
+    `select position, count(*) from info where user_name = '${username}' group by position`
+  )
     .then((data) => {
       res.send(data);
     })
@@ -75,9 +90,40 @@ app.get("/info/pie", (req, res) => {
 });
 
 app.get("/info/status", (req, res) => {
-  db.query(`select status, count(*) from info group by status`)
+  const username = req.query.name;
+  db.query(
+    `select status, count(*) from info where user_name = '${username}' group by status`
+  )
     .then((data) => {
+      console.log("data is", data);
       res.send(data);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
+
+app.post("/user", (req, res) => {
+  console.log(req.body);
+  const uid = req.body.uid;
+  const name = req.body.name;
+  db.query(`insert into user_info (uid,name) values('${uid}', '${name}')`)
+    .then(() => {
+      console.log("inserted data");
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
+
+app.get("/user", (req, res) => {
+  const uid = req.query;
+  console.log(uid);
+  db.query(`select name from user_info where uid = uid`)
+    .then((response) => {
+      const name = response[0].name;
+      console.log(name);
+      res.send(name);
     })
     .catch((err) => {
       console.log(err);
