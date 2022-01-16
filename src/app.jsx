@@ -6,6 +6,24 @@ import Graph from "./cube.jsx";
 import Chart from "./pie.jsx";
 import Status from "./funnel.jsx";
 import Login from "./login.jsx";
+import { app } from "../firebase_config.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+  GoogleAuthProvider,
+  signInWithPopup,
+  getRedirectResult,
+  sendSignInLinkToEmail,
+  isSignInWithEmailLink,
+  signInWithEmailLink,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  reauthenticateWithCredential,
+} from "firebase/auth";
+
 class App extends React.Component {
   constructor() {
     super();
@@ -18,7 +36,9 @@ class App extends React.Component {
       status: [],
       deletion: [],
       update: {},
-      login: true,
+      login: "loading",
+      uid: "",
+      username: "",
     };
     this.getUserinfo = this.getUserinfo.bind(this);
     this.showModal = this.showModal.bind(this);
@@ -29,17 +49,50 @@ class App extends React.Component {
     this.getPieInfo = this.getPieInfo.bind(this);
     this.getStatus = this.getStatus.bind(this);
     this.select = this.select.bind(this);
+    this.signout = this.signout.bind(this);
+    this.getauth = this.getauth.bind(this);
   }
   componentDidMount() {
-    this.getUserinfo();
-    this.getGraphInfo();
-    this.getPieInfo();
-    this.getStatus();
+    this.getauth();
+    // this.getGraphInfo();
+    // this.getPieInfo();
+    // this.getStatus();
   }
 
-  getUserinfo() {
+  getauth() {
+    const auth = getAuth(app);
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        this.setState({ login: true });
+        this.getUserinfo(user);
+        this.getUsername(user);
+      } else {
+        this.setState({ login: false });
+      }
+    });
+  }
+
+  //get username
+  getUsername(user) {
+    console.log("invoking this");
     axios
-      .get("/info")
+      .get("/user", { params: { uid: user.uid } })
+      .then((response) => {
+        console.log("response is", response.data);
+        this.getGraphInfo(response.data);
+        this.getPieInfo(response.data);
+        this.getPieInfo(response.data);
+        this.getStatus(response.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
+  //get user's job applications
+  getUserinfo(user) {
+    axios
+      .get("/info", { params: { uid: user.uid } })
       .then((res) => {
         var input = [];
         res.data.forEach((item) => {
@@ -52,10 +105,12 @@ class App extends React.Component {
       });
   }
 
-  getGraphInfo() {
+  //get date
+  getGraphInfo(username) {
     axios
-      .get("info/date")
+      .get("info/date", { params: { name: username } })
       .then((res) => {
+        console.log("response is".res);
         var input = [];
         res.data.forEach((item) => {
           item.date = item.date.substring(0, 10);
@@ -68,9 +123,10 @@ class App extends React.Component {
       });
   }
 
-  getPieInfo() {
+  //get info for pie chart
+  getPieInfo(username) {
     axios
-      .get("/info/pie")
+      .get("/info/pie", { params: { name: username } })
       .then((res) => {
         var input = [];
         res.data.forEach((item) => {
@@ -84,9 +140,11 @@ class App extends React.Component {
       });
   }
 
-  getStatus() {
+  //get job application status
+  getStatus(username) {
+    console.log("username", username);
     axios
-      .get("/info/status")
+      .get("/info/status", { params: { name: username } })
       .then((res) => {
         var input = [];
         res.data.forEach((item) => {
@@ -114,18 +172,31 @@ class App extends React.Component {
       });
   }
 
+  //modal view manipulation
+
   showModal() {
     this.setState({ modal: true });
   }
   closeModal() {
     this.setState({ modal: false });
   }
-  signin() {
-    const status = this.state.login;
-    this.setState({ login: !status });
-    console.log(this.state.login);
+
+  //sign out
+  signout() {
+    const auth = getAuth(app);
+    signOut(auth)
+      .then(() => {
+        console.log("sign out");
+      })
+      .then(() => {
+        this.getauth();
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
   }
 
+  //remove job application from board
   delete() {
     axios
       .put("/info/delete", { id: this.state.selected })
@@ -140,8 +211,8 @@ class App extends React.Component {
       });
   }
 
+  //select to update
   select() {
-    console.log(this.state.selected.length);
     if (this.state.selected.length > 1) {
       alert("please select only one to update");
     }
@@ -171,6 +242,7 @@ class App extends React.Component {
     }
   }
 
+  //selection
   selection(e) {
     const curr = this.state.selected;
     if (this.state.selected.includes(e.target.id)) {
@@ -184,11 +256,15 @@ class App extends React.Component {
   }
 
   render() {
-    return this.state.login ? (
-      <Login signin={this.signin.bind(this)} />
+    if (this.state.login === "loading") {
+      return <div></div>;
+    }
+    return !this.state.login ? (
+      <Login signin={this.getauth} />
     ) : (
       <div>
         <h1 className="title">Job Application Tracker</h1>
+        <u onClick={this.signout}>Sign Out</u>
         <button onClick={this.showModal} className="add-button">
           Add More Job Applications
         </button>
